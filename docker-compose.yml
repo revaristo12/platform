@@ -1,0 +1,213 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Backend API (FastAPI)
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: meeting-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://meeting_user:meeting_pass@postgres:5432/meeting_db
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ENVIRONMENT=development
+    volumes:
+      - ./backend:/app
+      - backend-recordings:/app/recordings
+      - backend-transcriptions:/app/transcriptions
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - meeting-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: meeting-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=meeting_user
+      - POSTGRES_PASSWORD=meeting_pass
+      - POSTGRES_DB=meeting_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - meeting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meeting_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Redis (Cache & Session)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: meeting-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - meeting-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================
+  # Celery Worker (Processamento Assíncrono)
+  # ============================================
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: meeting-celery-worker
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://meeting_user:meeting_pass@postgres:5432/meeting_db
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - ./backend:/app
+      - backend-recordings:/app/recordings
+      - backend-transcriptions:/app/transcriptions
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - meeting-network
+    command: celery -A app.celery_app worker --loglevel=info
+
+  # ============================================
+  # Celery Beat (Agendamento de Tarefas)
+  # ============================================
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: meeting-celery-beat
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://meeting_user:meeting_pass@postgres:5432/meeting_db
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - meeting-network
+    command: celery -A app.celery_app beat --loglevel=info
+
+  # ============================================
+  # Frontend (React)
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: meeting-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_WS_URL=ws://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - meeting-network
+    command: npm start
+
+  # ============================================
+  # Nginx (Reverse Proxy & Load Balancer)
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: meeting-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - meeting-network
+
+  # ============================================
+  # Coturn (STUN/TURN Server para WebRTC)
+  # ============================================
+  coturn:
+    image: coturn/coturn:latest
+    container_name: meeting-coturn
+    restart: unless-stopped
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+      - "5349:5349/tcp"
+      - "5349:5349/udp"
+      - "49152-49200:49152-49200/udp"
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf
+    networks:
+      - meeting-network
+    command: ["-c", "/etc/coturn/turnserver.conf"]
+
+  # ============================================
+  # Adminer (Database Management UI)
+  # ============================================
+  adminer:
+    image: adminer:latest
+    container_name: meeting-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+    depends_on:
+      - postgres
+    networks:
+      - meeting-network
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  meeting-network:
+    driver: bridge
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  postgres-data:
+  redis-data:
+  backend-recordings:
+  backend-transcriptions:

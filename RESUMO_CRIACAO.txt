@@ -1,0 +1,222 @@
+╔════════════════════════════════════════════════════════════════════╗
+║   RESUMO - Sistema de Instalação para VPS Ubuntu 20.04           ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📦 ARQUIVOS CRIADOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. scripts/install-vps.sh
+   → Script de instalação automatizada para VPS Ubuntu 20.04
+   → Instala Docker, configura firewall, Fail2Ban, backup automático
+   → Gera secrets seguros automaticamente
+   → Builda e inicia todos os containers
+
+2. docs/VPS_INSTALLATION.md
+   → Documentação completa de instalação
+   → Guia passo a passo
+   → Troubleshooting e solução de problemas
+   → Configuração de segurança
+
+3. scripts/README.md
+   → Guia de uso dos scripts
+   → Comandos úteis pós-instalação
+   → Referência rápida
+
+4. INSTALL_GUIDE_PT.md
+   → Guia de instalação em português
+   → Resumo executivo
+   → Checklist de configuração
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 COMO USAR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. COPIE os arquivos para o servidor VPS Ubuntu 20.04:
+
+   scp -r . root@seu-servidor:/opt/meeting-ai-platform
+
+2. EXECUTE o script de instalação:
+
+   ssh root@seu-servidor
+   cd /opt/meeting-ai-platform
+   chmod +x scripts/install-vps.sh
+   sudo ./scripts/install-vps.sh
+
+3. CONFIGURE as API Keys (obrigatório):
+
+   nano .env
+   # Edite OPENAI_API_KEY e ANTHROPIC_API_KEY
+
+4. REINICIE os serviços:
+
+   docker compose restart
+
+5. ACESSE a plataforma:
+
+   http://seu-servidor:3000
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 O QUE O SCRIPT FAZ AUTOMATICAMENTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Atualiza o sistema Ubuntu
+✅ Instala Docker e Docker Compose
+✅ Configura firewall (UFW)
+✅ Configura Fail2Ban (proteção contra ataques)
+✅ Gera secrets seguros (JWT, senhas)
+✅ Cria arquivo .env
+✅ Cria diretórios necessários
+✅ Builda containers Docker
+✅ Inicia todos os serviços
+✅ Executa migrations do banco
+✅ Configura backup automático (diário às 2:00 AM)
+✅ Configura SSL opcional com Let's Encrypt
+✅ Verifica saúde dos serviços
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 REQUISITOS DO SERVIDOR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• Ubuntu 20.04 LTS
+• Mínimo 2 CPU cores (recomendado: 4+)
+• Mínimo 4GB RAM (recomendado: 8GB+)
+• Mínimo 20GB disco (recomendado: 50GB+)
+• Acesso root ou sudo
+• Conexão com internet
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚙️ CONFIGURAÇÃO NECESSÁRIA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Após a instalação, configure no arquivo .env:
+
+1. OPENAI_API_KEY
+   → Obtenha em: https://platform.openai.com/api-keys
+   → Usado para transcrição (Whisper) e análise (GPT)
+
+2. ANTHROPIC_API_KEY
+   → Obtenha em: https://console.anthropic.com/
+   → Usado para análise avançada (Claude)
+
+3. CORS_ORIGINS (se tiver domínio)
+   → Adicione seu domínio para permitir acesso
+
+4. DOMAIN (se quiser SSL)
+   → Configure para usar Let's Encrypt
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 COMPONENTES DO SISTEMA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SERVIÇOS (Containers Docker):
+  • Backend (FastAPI) - Porta 8000
+  • Frontend (React) - Porta 3000
+  • PostgreSQL - Banco de dados
+  • Redis - Cache
+  • Celery Worker - Processamento
+  • Celery Beat - Agendamento
+  • Nginx - Proxy reverso
+  • Coturn - TURN server (WebRTC)
+  • Adminer - DB UI (dev)
+
+SEGURANÇA:
+  • Firewall UFW configurado
+  • Fail2Ban ativo
+  • SSL/TLS suportado
+  • Secrets gerados automaticamente
+  • Containers não-root
+  • Logs rotacionados
+  • Backup automático
+
+FUNCIONALIDADES:
+  • Reuniões virtuais (WebRTC)
+  • Transcrição em tempo real
+  • Análise com IA
+  • Dashboard de métricas
+  • API REST completa
+  • Processamento assíncrono
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 DOCUMENTAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• docs/VPS_INSTALLATION.md - Instalação detalhada
+• README.md - Documentação principal
+• QUICKSTART.md - Início rápido
+• scripts/README.md - Scripts disponíveis
+• INSTALL_GUIDE_PT.md - Guia em português
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🆘 COMANDOS ÚTEIS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Ver logs em tempo real
+docker compose logs -f
+
+# Ver logs de serviço específico
+docker compose logs -f backend
+
+# Reiniciar serviços
+docker compose restart
+
+# Parar todos os serviços
+docker compose stop
+
+# Ver status dos containers
+docker compose ps
+
+# Acessar shell do backend
+docker compose exec backend /bin/bash
+
+# Acessar banco de dados
+docker compose exec postgres psql -U meeting_user -d meeting_db
+
+# Backup manual
+sudo /usr/local/bin/meeting-backup.sh
+
+# Iniciar em modo produção
+make prod
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CHECKLIST PÓS-INSTALAÇÃO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] Executar script de instalação
+[ ] Configurar OPENAI_API_KEY no .env
+[ ] Configurar ANTHROPIC_API_KEY no .env
+[ ] Reiniciar containers após configuração
+[ ] Acessar http://seu-servidor:3000
+[ ] Alterar senha do admin (padrão: admin123)
+[ ] Verificar logs sem erros
+[ ] Testar funcionalidades básicas
+[ ] Configurar SSL se tiver domínio
+[ ] Configurar CORS adequadamente
+[ ] Testar backup automático
+[ ] Configurar monitoramento (opcional)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 PRÓXIMOS PASSOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Faça upload dos arquivos para o servidor
+2. Execute o script de instalação
+3. Configure as API keys
+4. Acesse e teste a plataforma
+5. Altere as credenciais padrão
+6. Configure SSL (se aplicável)
+
+Para mais detalhes, consulte: docs/VPS_INSTALLATION.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Desenvolvido com ❤️ para reuniões inteligentes!
+

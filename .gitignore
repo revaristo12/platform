@@ -1,0 +1,129 @@
+# ============================================
+# Meeting AI Platform - .gitignore
+# ============================================
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+venv/
+ENV/
+env/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Node.js / React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+/build
+/.next/
+/out/
+.DS_Store
+*.local
+
+# Docker
+*.log
+docker-compose.override.yml
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+pgdata/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Recordings & Transcriptions
+/backend/recordings/*
+/backend/transcriptions/*
+/backend/logs/*
+!/backend/recordings/.gitkeep
+!/backend/transcriptions/.gitkeep
+!/backend/logs/.gitkeep
+
+# Backups
+/backups/*
+*.sql.gz
+*.dump
+
+# SSL Certificates (never commit)
+/nginx/ssl/*.pem
+/nginx/ssl/*.key
+/nginx/ssl/*.crt
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Alembic
+/backend/alembic/versions/*.pyc
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Production builds
+/frontend/build/
+
+# Monitoring & Profiling
+*.prof
